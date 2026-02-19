@@ -1,7 +1,7 @@
 import Nav from './components/Nav';
 import Banner from './components/Banner';
 import Row from './components/Row';
-import { requests } from './api/tmdb';
+import { fetchByGenre, fetchTopRated, fetchTrending } from './api/tmdb';
 
 function App() {
   return (
@@ -9,18 +9,20 @@ function App() {
       <Nav />
       <Banner />
 
-      {/* Movie Rows */}
+      {/* Show Rows */}
       <main className="relative z-10 -mt-16 md:-mt-24 pb-20">
         <Row
-          title="NETFLIX ORIGINALS"
-          fetchUrl={requests.fetchNetflixOriginals}
+          title="TRENDING NOW"
+          fetchShows={fetchTrending}
           isLargeRow
         />
-        <Row title="Trending Now" fetchUrl={requests.fetchTrending} />
-        <Row title="Top Rated" fetchUrl={requests.fetchTopRated} />
-        <Row title="Action Movies" fetchUrl={requests.fetchAction} />
-        <Row title="Comedy Movies" fetchUrl={requests.fetchComedy} />
-        <Row title="Horror Movies" fetchUrl={requests.fetchHorror} />
+        <Row title="Top Rated" fetchShows={fetchTopRated} />
+        <Row title="Drama" fetchShows={() => fetchByGenre('Drama')} />
+        <Row title="Comedy" fetchShows={() => fetchByGenre('Comedy')} />
+        <Row title="Thriller" fetchShows={() => fetchByGenre('Thriller')} />
+        <Row title="Science-Fiction" fetchShows={() => fetchByGenre('Science-Fiction')} />
+        <Row title="Crime" fetchShows={() => fetchByGenre('Crime')} />
+        <Row title="Horror" fetchShows={() => fetchByGenre('Horror')} />
       </main>
 
       {/* Footer */}
@@ -32,7 +34,7 @@ function App() {
           </h3>
           <p className="text-gray-500 text-xs">
             This is a demo project. Not affiliated with Netflix. Data provided
-            by TMDB.
+            by TVMaze.
           </p>
         </div>
       </footer>

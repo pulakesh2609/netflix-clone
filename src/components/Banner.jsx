@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Info } from 'lucide-react';
-import axios, { requests, IMAGE_BASE } from '../api/tmdb';
+import { fetchBannerShow, stripHtml } from '../api/tmdb';
 
 function Banner() {
-    const [movie, setMovie] = useState(null);
+    const [show, setShow] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get(requests.fetchNetflixOriginals);
-                const results = response.data.results;
-                const randomMovie = results[Math.floor(Math.random() * results.length)];
-                setMovie(randomMovie);
+                const randomShow = await fetchBannerShow();
+                setShow(randomShow);
             } catch (error) {
                 console.error('Failed to fetch banner data:', error);
             }
@@ -20,7 +18,7 @@ function Banner() {
         fetchData();
     }, []);
 
-    if (!movie) {
+    if (!show) {
         return (
             <div className="h-screen bg-[#050505] flex items-center justify-center">
                 <div className="w-10 h-10 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
@@ -28,22 +26,25 @@ function Banner() {
         );
     }
 
-    const title = movie.title || movie.name || movie.original_name;
-    const description = movie.overview
-        ? movie.overview.length > 200
-            ? movie.overview.substring(0, 200) + '...'
-            : movie.overview
-        : '';
+    const title = show.name;
+    const description = stripHtml(show.summary);
+    const truncated =
+        description.length > 200
+            ? description.substring(0, 200) + '...'
+            : description;
+    const backdropImage = show.image?.original || show.image?.medium;
 
     return (
         <header className="relative h-[85vh] md:h-screen w-full overflow-hidden">
             {/* Background Image */}
             <div className="absolute inset-0">
-                <img
-                    src={`${IMAGE_BASE}${movie.backdrop_path}`}
-                    alt={title}
-                    className="w-full h-full object-cover"
-                />
+                {backdropImage && (
+                    <img
+                        src={backdropImage}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                    />
+                )}
                 {/* Gradient overlays */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/30" />
@@ -65,10 +66,24 @@ function Banner() {
                         <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 leading-tight tracking-tight">
                             {title}
                         </h1>
-                        {description && (
+                        {truncated && (
                             <p className="text-sm md:text-base text-gray-300 leading-relaxed mb-6">
-                                {description}
+                                {truncated}
                             </p>
+                        )}
+
+                        {/* Rating Badge */}
+                        {show.rating?.average && (
+                            <div className="flex items-center gap-2 mb-5">
+                                <span className="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-2 py-1 rounded-md">
+                                    ⭐ {show.rating.average}/10
+                                </span>
+                                {show.genres?.length > 0 && (
+                                    <span className="text-gray-400 text-xs">
+                                        {show.genres.slice(0, 3).join(' • ')}
+                                    </span>
+                                )}
+                            </div>
                         )}
 
                         {/* Buttons */}

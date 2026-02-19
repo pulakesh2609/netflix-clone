@@ -1,24 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import axios from '../api/tmdb';
 import MovieCard from './MovieCard';
 
-function Row({ title, fetchUrl, isLargeRow = false }) {
-    const [movies, setMovies] = useState([]);
+function Row({ title, fetchShows, isLargeRow = false }) {
+    const [shows, setShows] = useState([]);
     const scrollRef = useRef(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get(fetchUrl);
-                setMovies(response.data.results);
+                const results = await fetchShows();
+                setShows(results);
             } catch (error) {
                 console.error(`Failed to fetch ${title}:`, error);
             }
         }
         fetchData();
-    }, [fetchUrl, title]);
+    }, [fetchShows, title]);
 
     const scroll = (direction) => {
         const container = scrollRef.current;
@@ -54,15 +53,15 @@ function Row({ title, fetchUrl, isLargeRow = false }) {
                     <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                {/* Movie Cards Container */}
+                {/* Show Cards Container */}
                 <div
                     ref={scrollRef}
                     className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth py-2"
                 >
-                    {movies.map((movie) => (
+                    {shows.map((show) => (
                         <MovieCard
-                            key={movie.id}
-                            movie={movie}
+                            key={show.id}
+                            show={show}
                             isLarge={isLargeRow}
                         />
                     ))}
